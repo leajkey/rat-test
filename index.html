@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Remote Associates Test (RAT)</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .hidden { display: none; }
+    .question { margin-bottom: 20px; }
+    input[type="text"] { width: 100%; padding: 8px; margin-top: 8px; }
+    button { padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h1>Welcome to the Remote Associates Test (RAT)</h1>
+  <p>Thank you for taking part in this creativity study.</p>
+  <p>This task measures creative insight and associative thinking. You will be given 15 short word puzzles, randomly selected from a pool of 30. Each puzzle consists of three seemingly unrelated words, and your challenge is to find a single word that connects all three.</p>
+  <p><strong>Example:</strong><br>If the words are <strong>board, magic, and death</strong>, the correct answer is <strong>spell</strong>.</p>
+  <p>You will be presented with 15 puzzles:<br>
+  5 Easy<br>
+  5 Medium<br>
+  5 Hard</p>
+  <p>You will have a total of 10 minutes to complete all the questions. You can answer in any order, but once time is up, the test ends automatically.</p>
+  <p>Your answers will be recorded anonymously and used only for academic analysis.</p>
+  <p>When you’re ready, enter your Participant ID and click Start to begin.</p>
+
+  <label for="participantId">Participant ID:</label>
+  <input type="text" id="participantId" required>
+  <button onclick="startTest()">Start Test</button>
+
+  <form id="ratForm" class="hidden">
+    <div id="questions"></div>
+    <button type="submit">Submit Answers</button>
+  </form>
+
+  <div id="thankYou" class="hidden">
+    <h2>Thank you for your participation!</h2>
+    <p>Thank you for taking part in this study. Your responses have been successfully recorded. We appreciate your time and effort in contributing to this research on creativity and associative thinking.</p>
+    <p>If you have any questions or would like more information about the study, feel free to contact the research team.</p>
+  </div>
+
+  <script>
+    const questionsPool = [
+      { level: "easy", words: ["Cottage", "Swiss", "Cake"] },
+      { level: "easy", words: ["Cream", "Skate", "Water"] },
+      { level: "easy", words: ["Loser", "Throat", "Spot"] },
+      { level: "easy", words: ["Show", "Life", "Row"] },
+      { level: "easy", words: ["Night", "Wrist", "Stop"] },
+      { level: "easy", words: ["Duck", "Fold", "Dollar"] },
+      { level: "easy", words: ["Square", "Cardboard", "Open"] },
+      { level: "easy", words: ["Broken", "Clear", "Eye"] },
+      { level: "easy", words: ["Coin", "Quick", "Spoon"] },
+      { level: "easy", words: ["Time", "Hair", "Stretch"] },
+
+      { level: "medium", words: ["Aid", "Rubber", "Wagon"] },
+      { level: "medium", words: ["Sense", "Courtesy", "Place"] },
+      { level: "medium", words: ["Flower", "Friend", "Scout"] },
+      { level: "medium", words: ["Opera", "Hand", "Dish"] },
+      { level: "medium", words: ["Wheel", "Hand", "Shopping"] },
+      { level: "medium", words: ["Fox", "Man", "Peep"] },
+      { level: "medium", words: ["High", "District", "House"] },
+      { level: "medium", words: ["Print", "Berry", "Bird"] },
+      { level: "medium", words: ["Flower", "Paint", "Hair"] },
+      { level: "medium", words: ["Match", "Maker", "Point"] },
+
+      { level: "hard", words: ["Home", "Sea", "Bed"] },
+      { level: "hard", words: ["Fence", "Card", "Master"] },
+      { level: "hard", words: ["Illness", "Bus", "Computer"] },
+      { level: "hard", words: ["Wise", "Work", "Tower"] },
+      { level: "hard", words: ["Dust", "Cereal", "Fish"] },
+      { level: "hard", words: ["Mouse", "Sharp", "Blue"] },
+      { level: "hard", words: ["Line", "Birthday", "Surprise"] },
+      { level: "hard", words: ["Wood", "Liquor", "Luck"] },
+      { level: "hard", words: ["House", "Village", "Golf"] },
+      { level: "hard", words: ["Base", "Snow", "Dance"] }
+    ];
+
+    function startTest() {
+      const participantId = document.getElementById("participantId").value.trim();
+      if (!participantId) {
+        alert("Please enter your Participant ID to begin.");
+        return;
+      }
+      document.querySelector("button").style.display = "none";
+      document.getElementById("participantId").style.display = "none";
+      document.getElementById("ratForm").classList.remove("hidden");
+      const questionsDiv = document.getElementById("questions");
+
+      const selected = selectRandomQuestions();
+
+      selected.forEach((q, i) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        div.innerHTML = `<label>Q${i + 1}: ${q.words.join(" / ")}<br><input type='text' name='Q${i + 1}'></label>`;
+        questionsDiv.appendChild(div);
+      });
+
+      setTimeout(() => document.getElementById("ratForm").submit(), 10 * 60 * 1000);
+    }
+
+    function selectRandomQuestions() {
+      const shuffle = (arr) => arr.sort(() => 0.5 - Math.random());
+      const easy = shuffle(questionsPool.filter(q => q.level === "easy")).slice(0, 5);
+      const medium = shuffle(questionsPool.filter(q => q.level === "medium")).slice(0, 5);
+      const hard = shuffle(questionsPool.filter(q => q.level === "hard")).slice(0, 5);
+      return [...easy, ...medium, ...hard];
+    }
+
+    document.getElementById("ratForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = {};
+      for (let [key, value] of formData.entries()) {
+        data[key] = value;
+      }
+      data.ParticipantID = document.getElementById("participantId").value;
+
+      fetch("https://script.google.com/macros/s/AKfycbwCvo5NkUoD3RdgnU5R7FsR9tQ4xc5YVgyZoFFw_wPYwZyFcVcERih4xD_7yoJXpHU1/exec", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then(() => {
+        document.getElementById("ratForm").classList.add("hidden");
+        document.getElementById("thankYou").classList.remove("hidden");
+      }).catch(error => alert("Error submitting form: " + error));
+    });
+  </script>
+
+</body>
+</html>
